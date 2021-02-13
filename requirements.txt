@@ -22,3 +22,5 @@ googletrans
 telegraph
 pillow
 uuid==1.30
+pynewtonmath
+

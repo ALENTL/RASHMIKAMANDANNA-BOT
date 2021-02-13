@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-
 import telegram.ext as tg
 
 # enable logging
@@ -11,9 +10,9 @@ logging.basicConfig(
 
 LOGGER = logging.getLogger(__name__)
 
-# if version < 3.9, stop bot.
-if sys.version_info[0] < 3 or sys.version_info[1] < 9:
-    LOGGER.error("You MUST have a python version of at least 3.9! Multiple features depend on this. Bot quitting.")
+# if version < 3.6, stop bot.
+if sys.version_info[0] < 3 or sys.version_info[1] < 6:
+    LOGGER.error("You MUST have a python version of at least 3.6! Multiple features depend on this. Bot quitting.")
     quit(1)
 
 ENV = bool(os.environ.get('ENV', False))
@@ -51,7 +50,7 @@ if ENV:
     DB_URI = os.environ.get('DATABASE_URL')
     DONATION_LINK = os.environ.get('DONATION_LINK')
     LOAD = os.environ.get("LOAD", "").split()
-    NO_LOAD = os.environ.get("NO_LOAD", "").split()
+    NO_LOAD = os.environ.get("NO_LOAD", "translation").split()
     DEL_CMDS = bool(os.environ.get('DEL_CMDS', False))
     STRICT_GBAN = bool(os.environ.get('STRICT_GBAN', False))
     WORKERS = int(os.environ.get('WORKERS', 8))
@@ -100,22 +99,25 @@ else:
     BAN_STICKER = Config.BAN_STICKER
     ALLOW_EXCL = Config.ALLOW_EXCL
     STRICT_GMUTE = Config.STRICT_GMUTE
-   
+
 
 SUDO_USERS.add(OWNER_ID)
-SUDO_USERS.add(683538773)
-SUDO_USERS.add(570400686)
-SUDO_USERS.add(466337795)
-SUDO_USERS.add(254318997)
+import tg_bot.modules.sql.gpromote_sql as gpromote_sql
+sudo_list = gpromote_sql.get_sudo_list()
+for i in sudo_list:
+    temp = i['user_id']
+    SUDO_USERS.add(temp)
 
 updater = tg.Updater(TOKEN, workers=WORKERS)
-
 dispatcher = updater.dispatcher
-
 SUDO_USERS = list(SUDO_USERS)
 WHITELIST_USERS = list(WHITELIST_USERS)
 SUPPORT_USERS = list(SUPPORT_USERS)
-
+import tg_bot.modules.sql.gsupport_sql as gsupport_sql
+support_list = gsupport_sql.get_support_list()
+for i in support_list:
+    temp = i['user_id']
+    SUPPORT_USERS.append(temp)
 # Load at end to ensure all prev variables have been set
 from tg_bot.modules.helper_funcs.handlers import CustomCommandHandler, CustomRegexHandler
 
